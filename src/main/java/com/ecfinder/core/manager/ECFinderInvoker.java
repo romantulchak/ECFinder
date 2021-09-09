@@ -14,8 +14,8 @@ public class ECFinderInvoker<E> {
         this.ecFinderHandler = ecFinderHandler;
     }
 
-    public List<E> invoke(long entityId, String table, Class<?> clazz) {
-        return ecFinderHandler.handleElements(entityId, table, clazz);
+    public List<E> invoke(long entityId, Class<?> clazz, Class<?> parentEntity) {
+        return ecFinderHandler.handleElements(entityId, clazz, parentEntity);
     }
 
 }

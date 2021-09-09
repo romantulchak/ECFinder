@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ECF {
-    String tableName();
+public @interface ECFEntity {
+    String tablePrefix();
+    String tableId() default "";
 }

@@ -29,4 +29,8 @@ public final class DynamicalMethodUtils {
         return rs.getDate(fieldName).toLocalDate();
     }
 
+    public int getInteger(String fieldName) throws SQLException {
+        return rs.getInt(fieldName);
+    }
+
 }
