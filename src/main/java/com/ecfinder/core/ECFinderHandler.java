@@ -40,7 +40,7 @@ public class ECFinderHandler<E> {
         throw new ClassNotMarkedAsElementCollectionException(clazz);
     }
 
-    protected String getTableName(Class<?> clazz, Class<?> parentEntity) {
+    private String getTableName(Class<?> clazz, Class<?> parentEntity) {
         ECFEntity annotation = parentEntity.getAnnotation(ECFEntity.class);
         if (annotation != null) {
             ECF ecf = clazz.getDeclaredAnnotation(ECF.class);
@@ -49,7 +49,7 @@ public class ECFinderHandler<E> {
         throw new ClassNotMarkedAsParentEntityException(parentEntity);
     }
 
-    protected String getParentColumnIdName(Class<?> parentEntity) {
+    private String getParentColumnIdName(Class<?> parentEntity) {
         ECFEntity ecfEntity = parentEntity.getDeclaredAnnotation(ECFEntity.class);
         if (ecfEntity != null) {
             if (!ecfEntity.tableId().isEmpty()){
