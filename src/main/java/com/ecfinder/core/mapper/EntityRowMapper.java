@@ -21,6 +21,13 @@ public class EntityRowMapper<E> implements RowMapper<E> {
         this.entity = entity;
     }
 
+    /**
+     * Fills in the fields of Embeddable class with the corresponding data from the database
+     *
+     * @param rs data from database
+     * @param rowNum number of row in database
+     * @return Embeddable object with filled fields
+     */
     @Override
     public E mapRow(ResultSet rs, int rowNum) {
         EntityInstanceUtils<E> eEntityInstanceUtils = new EntityInstanceUtils<>();

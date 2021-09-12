@@ -2,10 +2,8 @@ package com.ecfinder.core;
 
 import com.ecfinder.exception.ClassNotMarkedAsElementCollectionException;
 import com.ecfinder.exception.ClassNotMarkedAsParentEntityException;
-import com.ecfinder.test.ElementCollectionTest;
-import com.ecfinder.test.ElementCollectionWithoutAnnotation;
-import com.ecfinder.test.EntityTest;
-import com.ecfinder.test.EntityTestWithoutAnnotation;
+import com.ecfinder.exception.TableNotExistsException;
+import com.ecfinder.test.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -68,6 +66,13 @@ class ECFinderHandlerTest {
     void handleElements_withoutECFEntityAnnotation() {
         assertThrows(ClassNotMarkedAsParentEntityException.class, () -> {
             ecRealData.handleElements(1, ElementCollectionTest.class, EntityTestWithoutAnnotation.class);
+        });
+    }
+
+    @Test
+    void handleElements_throwTableNotExistsException() {
+        assertThrows(TableNotExistsException.class, () -> {
+            ecRealData.handleElements(1, ElementCollectionTest.class, EntityTestWithoutTable.class);
         });
     }
 
