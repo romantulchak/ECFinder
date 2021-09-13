@@ -1,7 +1,9 @@
 package com.ecfinder.core.manager;
 
 import com.ecfinder.core.ECFinderHandler;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -14,8 +16,29 @@ public class ECFinderInvoker<E> {
         this.ecFinderHandler = ecFinderHandler;
     }
 
+    /**
+     * Check if Embeddable class and Parent Entity marked with the necessary annotations
+     * gets parent column id name and table name and it makes a query to the database
+     *
+     * @param entityId     Depending on it the search will take place
+     * @param clazz        Embeddable class
+     * @param parentEntity Parent entity class
+     * @return List of elements depending on Generic type
+     */
     public List<E> invoke(long entityId, Class<?> clazz, Class<?> parentEntity) {
         return ecFinderHandler.handleElements(entityId, clazz, parentEntity);
     }
 
+    /**
+     * Get Page<E> depends on Pageable
+     *
+     * @param entityId Depending on it the search will take place
+     * @param clazz Embeddable class
+     * @param parentEntity Parent entity class
+     * @param pageable Pageable object that contains current page, elements per page
+     * @return Page object that contains content, pageable and total elements
+     */
+    public Page<E> invoke(long entityId, Class<?> clazz, Class<?> parentEntity, Pageable pageable){
+        return ecFinderHandler.handleElements(entityId, clazz, parentEntity, pageable);
+    }
 }

@@ -11,6 +11,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
@@ -53,6 +57,24 @@ class ECFinderHandlerTest {
         assertNotNull(realData);
         assertEquals(mockData.size(), realData.size());
         assertEquals(realData.get(0), mockData.get(0));
+    }
+
+    @Test
+    void handleElements_page() {
+        List<ElementCollectionTest> elementCollectionTests = new ArrayList<>();
+        elementCollectionTests.add(new ElementCollectionTest("Test_elm-col1"));
+        elementCollectionTests.add(new ElementCollectionTest("Test_elm-col2"));
+        elementCollectionTests.add(new ElementCollectionTest("Test_elm-col3"));
+
+        Pageable pageable = PageRequest.of(0, 1);
+        PageImpl<ElementCollectionTest> page = new PageImpl<>(elementCollectionTests, pageable, 3);
+        Mockito.when(mockData.handleElements(1, ElementCollectionTest.class, EntityTest.class, pageable)).thenReturn(page);
+        Page<ElementCollectionTest> mockData = this.mockData.handleElements(1, ElementCollectionTest.class, EntityTest.class, pageable);
+        Page<ElementCollectionTest> realData = ecRealData.handleElements(1, ElementCollectionTest.class, EntityTest.class, pageable);
+
+        assertNotNull(realData);
+        assertEquals(mockData.getTotalElements(), realData.getTotalElements());
+        assertEquals(mockData.getContent().get(0), realData.getContent().get(0));
     }
 
     @Test
