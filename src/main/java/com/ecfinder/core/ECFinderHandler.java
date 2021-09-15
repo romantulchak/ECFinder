@@ -2,11 +2,9 @@ package com.ecfinder.core;
 
 import com.ecfinder.core.anotation.ECF;
 import com.ecfinder.core.anotation.ECFEntity;
+import com.ecfinder.core.anotation.ECFUnique;
 import com.ecfinder.core.mapper.EntityRowMapper;
-import com.ecfinder.exception.ClassNotMarkedAsElementCollectionException;
-import com.ecfinder.exception.ClassNotMarkedAsParentEntityException;
-import com.ecfinder.exception.TableNotExistsException;
-import com.ecfinder.exception.TotalElementsCountNullException;
+import com.ecfinder.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.Embeddable;
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -25,11 +24,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class ECFinderHandler<E> {
 
     private static final String SELECT_QUERY = "SELECT * FROM %s WHERE %s = ?";
+    private static final String SELECT_UNIQUE_QUERY = "SELECT * FROM %s WHERE %s = ? AND %s = ?";
     private static final String SELECT_PAGE_QUERY = "SELECT * FROM %s WHERE %s = ? LIMIT ? OFFSET ?";
     private static final String SELECT_TOTAL_ELEMENTS_COUNT_QUERY = "SELECT count(1) FROM %s WHERE %s = ?";
     private static final String SEPARATOR = "_";
@@ -44,38 +45,77 @@ public class ECFinderHandler<E> {
 
 
     public List<E> handleElements(long entityId, Class<?> clazz, Class<?> parentEntity) {
-        if (clazz.isAnnotationPresent(ECF.class) && clazz.isAnnotationPresent(Embeddable.class)) {
-            String parentColumnIdName = getParentColumnIdName(parentEntity);
-            String tableName = getTableName(clazz, parentEntity);
-            EntityRowMapper<E> rowMapper = new EntityRowMapper<>(clazz);
-            if (isTableNotExists(tableName)) {
-                throw new TableNotExistsException(tableName);
-            }
-            return jdbcTemplate.query(String.format(SELECT_QUERY, tableName, parentColumnIdName), rowMapper, entityId);
+        checkAnnotation(clazz);
+        String parentColumnIdName = getParentColumnIdName(parentEntity);
+        String tableName = getTableName(clazz, parentEntity);
+        EntityRowMapper<E> rowMapper = new EntityRowMapper<>(clazz);
+        if (isTableNotExists(tableName)) {
+            throw new TableNotExistsException(tableName);
         }
-        throw new ClassNotMarkedAsElementCollectionException(clazz);
+        return jdbcTemplate.query(String.format(SELECT_QUERY, tableName, parentColumnIdName), rowMapper, entityId);
     }
 
     public Page<E> handleElements(long entityId, Class<?> clazz, Class<?> parentEntity, Pageable pageable) {
-        if (clazz.isAnnotationPresent(ECF.class) && clazz.isAnnotationPresent(Embeddable.class)) {
-            String tableName = getTableName(clazz, parentEntity);
-            String parentColumnIdName = getParentColumnIdName(parentEntity);
-            int totalElements = getTotalElements(entityId, tableName, parentColumnIdName);
-            EntityRowMapper<E> rowMapper = new EntityRowMapper<>(clazz);
-            if (isTableNotExists(tableName)) {
-                throw new TableNotExistsException(tableName);
-            }
-            List<E> query = jdbcTemplate.query(String.format(SELECT_PAGE_QUERY, tableName, parentColumnIdName), rowMapper, entityId, pageable.getPageSize(), pageable.getOffset());
-            return new PageImpl<>(query, pageable, totalElements);
+        checkAnnotation(clazz);
+        String tableName = getTableName(clazz, parentEntity);
+        String parentColumnIdName = getParentColumnIdName(parentEntity);
+        int totalElements = getTotalElements(entityId, tableName, parentColumnIdName);
+        EntityRowMapper<E> rowMapper = new EntityRowMapper<>(clazz);
+        if (isTableNotExists(tableName)) {
+            throw new TableNotExistsException(tableName);
         }
-        throw new ClassNotMarkedAsElementCollectionException(clazz);
+        List<E> query = jdbcTemplate.query(String.format(SELECT_PAGE_QUERY, tableName, parentColumnIdName), rowMapper, entityId, pageable.getPageSize(), pageable.getOffset());
+        return new PageImpl<>(query, pageable, totalElements);
+
+    }
+
+    public <U> E handleElements(long entityId, U uniqueValue, Class<?> clazz, Class<?> parentEntity) {
+        checkAnnotation(clazz);
+        String parentColumnIdName = getParentColumnIdName(parentEntity);
+        String tableName = getTableName(clazz, parentEntity);
+        String uniqueColumnName = getUniqueColumnName(clazz);
+        EntityRowMapper<E> rowMapper = new EntityRowMapper<>(clazz);
+        if (isTableNotExists(tableName)) {
+            throw new TableNotExistsException(tableName);
+        }
+        return jdbcTemplate.queryForObject(String.format(SELECT_UNIQUE_QUERY, tableName, parentColumnIdName, uniqueColumnName), rowMapper, entityId, uniqueValue);
+    }
+
+    private String getUniqueColumnName(Class<?> clazz) {
+        Field field = getUniqueField(clazz);
+        ECFUnique annotation = field.getAnnotation(ECFUnique.class);
+        if (!annotation.columnName().isEmpty()) {
+            return annotation.columnName();
+        }
+        return getColumnName(field.getName());
+    }
+
+    private Field getUniqueField(Class<?> clazz) {
+        List<Field> fields = Stream.of(clazz.getDeclaredFields())
+                .filter(field -> field.isAnnotationPresent(ECFUnique.class))
+                .collect(Collectors.toList());
+        if (fields.isEmpty()) {
+            throw new FieldsNotMarkedAsUniqueException(clazz);
+        }
+        if (fields.size() >= 2) {
+            String fieldsName = fields.stream().map(String::valueOf)
+                    .collect(Collectors.joining(",", "{", "}"));
+            throw new MoreFieldsThanOneMarkedAsUnique(fieldsName);
+        }
+        return fields.get(0);
+    }
+
+    private void checkAnnotation(Class<?> clazz) {
+        if (!clazz.isAnnotationPresent(ECF.class) || !clazz.isAnnotationPresent(Embeddable.class)) {
+            throw new ClassNotMarkedAsElementCollectionException(clazz);
+        }
     }
 
     private int getTotalElements(long entityId, String tableName, String parentColumnIdName) {
         try {
             return Objects.requireNonNull(jdbcTemplate.queryForObject(String.format(SELECT_TOTAL_ELEMENTS_COUNT_QUERY, tableName, parentColumnIdName),
                     (rs, rowNum) -> rs.getInt(1), entityId));
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw new TotalElementsCountNullException(entityId);
         }
     }
@@ -110,17 +150,21 @@ public class ECFinderHandler<E> {
             if (!ecfEntity.tableId().isEmpty()) {
                 return ecfEntity.tableId();
             }
-            String[] classWords = parentEntity.getSimpleName().split("(?=[A-Z])");
-            if (classWords.length > 1) {
-                String columnName = Arrays.stream(classWords).limit(classWords.length - 1L)
-                        .map(s -> s.toLowerCase(Locale.ROOT) + SEPARATOR)
-                        .collect(Collectors.joining());
-                columnName += classWords[classWords.length - 1].toLowerCase(Locale.ROOT) + ID_PREFIX;
-                return columnName;
-            }
-            return classWords[0].toLowerCase(Locale.ROOT) + ID_PREFIX;
+            return getColumnName(parentEntity.getSimpleName()) + ID_PREFIX;
         }
         throw new ClassNotMarkedAsParentEntityException(parentEntity);
+    }
+
+    private String getColumnName(String name) {
+        String[] classWords = name.split("(?=[A-Z])");
+        if (classWords.length > 1) {
+            String columnName = Arrays.stream(classWords).limit(classWords.length - 1L)
+                    .map(s -> s.toLowerCase(Locale.ROOT) + SEPARATOR)
+                    .collect(Collectors.joining());
+            columnName += classWords[classWords.length - 1].toLowerCase(Locale.ROOT);
+            return columnName.toLowerCase(Locale.ROOT);
+        }
+        return classWords[0].toLowerCase(Locale.ROOT);
     }
 
 }

@@ -6,8 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface ECF {
-    String tableName();
-    String uniqueColumnName() default "";
+@Target(ElementType.FIELD)
+public @interface ECFUnique {
+    String columnName() default "";
 }

@@ -10,18 +10,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class EntityInstanceUtilsTest {
 
     @Test
-    void getNewInstance_equals() {
+    void getNewInstanceEquals() {
         EntityInstanceUtils<EntityTest> instanceUtils = new EntityInstanceUtils<>();
 
         EntityTest entityTest = instanceUtils.getNewInstance(EntityTest.class);
         entityTest.setName("Test");
 
         assertEquals(new EntityTest("Test"), entityTest);
-
     }
 
     @Test
-    void getNewInstance_notEquals() {
+    void getNewInstanceNotEquals() {
         EntityInstanceUtils<?> instanceUtils = new EntityInstanceUtils<>();
 
         Object entityTestWithoutAnnotation = instanceUtils.getNewInstance(EntityTestWithoutAnnotation.class);
@@ -31,8 +30,9 @@ class EntityInstanceUtilsTest {
 
 
     @Test
-    void getNewInstance_createInstanceException() {
+    void getNewInstanceCreateInstanceException() {
         EntityInstanceUtils<ClassWithoutInstance> instanceUtils = new EntityInstanceUtils<>();
+
         assertThrows(Exception.class, () -> instanceUtils.getNewInstance(ClassWithoutInstance.class));
     }
 

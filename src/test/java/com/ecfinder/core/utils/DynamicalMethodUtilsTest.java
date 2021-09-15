@@ -37,7 +37,7 @@ class DynamicalMethodUtilsTest {
     }
 
     @Test
-    void getLocalDateTime_equalsAndNotNull() throws SQLException {
+    void getLocalDateTimeEqualsAndNotNull() throws SQLException {
         Mockito.when(resultSet.getTimestamp("datetime")).thenReturn(Timestamp.valueOf(localDateTime));
 
         LocalDateTime datetime = dynamicalMethodUtils.getLocalDateTime("datetime");
@@ -47,7 +47,7 @@ class DynamicalMethodUtilsTest {
     }
 
     @Test
-    void getLocalDateTime_notEqualsAndNotNUll() throws SQLException {
+    void getLocalDateTimeNotEqualsAndNotNull() throws SQLException {
         Mockito.when(resultSet.getTimestamp("datetime")).thenReturn(Timestamp.valueOf(localDateTime));
 
         LocalDateTime datetime = dynamicalMethodUtils.getLocalDateTime("datetime");
@@ -57,19 +57,19 @@ class DynamicalMethodUtilsTest {
     }
 
     @Test
-    void getLocalDateTime_throwNullPointerException() {
+    void getLocalDateTimeThrowNullPointerException() {
         assertThrows(NullPointerException.class, () -> dynamicalMethodUtils.getLocalDateTime("datetime"));
     }
 
     @Test
-    void getLocalDateTime_throwSqlException() throws SQLException {
+    void getLocalDateTimeThrowSqlException() throws SQLException {
         Mockito.when(resultSet.getTimestamp("datetime")).thenThrow(new SQLException());
 
         assertThrows(SQLException.class, () -> dynamicalMethodUtils.getLocalDateTime("datetime"));
     }
 
     @Test
-    void getInputStream_equalNotNull() throws SQLException {
+    void getInputStreamEqualNotNull() throws SQLException {
         String initialString = "test";
         InputStream targetStream = new ByteArrayInputStream(initialString.getBytes());
         Mockito.when(resultSet.getAsciiStream("asciiStream")).thenReturn(targetStream);
@@ -81,7 +81,7 @@ class DynamicalMethodUtilsTest {
     }
 
     @Test
-    void getInputStream_notEqualNotNull() throws SQLException {
+    void getInputStreamNotEqualNotNull() throws SQLException {
         String initialString = "test";
         InputStream targetStream = new ByteArrayInputStream(initialString.getBytes());
         Mockito.when(resultSet.getAsciiStream("asciiStream")).thenReturn(targetStream);
@@ -94,7 +94,7 @@ class DynamicalMethodUtilsTest {
     }
 
     @Test
-    void getInputStream_isNull() throws SQLException {
+    void getInputStreamIsNull() throws SQLException {
         Mockito.when(resultSet.getAsciiStream("asciiStream")).thenReturn(null);
 
         InputStream asciiStream = dynamicalMethodUtils.getInputStream("asciiStream");
@@ -103,7 +103,7 @@ class DynamicalMethodUtilsTest {
     }
 
     @Test
-    void getInputStream_throwSqlException() throws SQLException {
+    void getInputStreamThrowSqlException() throws SQLException {
         Mockito.when(resultSet.getAsciiStream("asciiStream")).thenThrow(new SQLException());
 
         assertThrows(SQLException.class, () -> dynamicalMethodUtils.getInputStream("asciiStream"));
@@ -111,7 +111,7 @@ class DynamicalMethodUtilsTest {
 
 
     @Test
-    void getLocalDate_equalNotNull() throws SQLException {
+    void getLocalDateEqualNotNull() throws SQLException {
         Mockito.when(resultSet.getDate("date")).thenReturn(Date.valueOf(localDateTime.toLocalDate()));
 
         LocalDate date = dynamicalMethodUtils.getLocalDate("date");
@@ -121,7 +121,7 @@ class DynamicalMethodUtilsTest {
     }
 
     @Test
-    void getLocalDate_notEqualNotNull() throws SQLException {
+    void getLocalDateNotEqualNotNull() throws SQLException {
         Mockito.when(resultSet.getDate("date")).thenReturn(Date.valueOf(localDateTime.toLocalDate()));
 
         LocalDate date = dynamicalMethodUtils.getLocalDate("date");
@@ -131,21 +131,21 @@ class DynamicalMethodUtilsTest {
     }
 
     @Test
-    void getLocalDate_isNull() throws SQLException {
+    void getLocalDateIsNull() throws SQLException {
         Mockito.when(resultSet.getDate("date")).thenReturn(null);
 
         assertThrows(NullPointerException.class, () -> dynamicalMethodUtils.getLocalDate("date"));
     }
 
     @Test
-    void getLocalDate_throwSqlException() throws SQLException {
+    void getLocalDateThrowSqlException() throws SQLException {
         Mockito.when(resultSet.getDate("date")).thenThrow(new SQLException());
 
         assertThrows(SQLException.class, () -> dynamicalMethodUtils.getLocalDate("date"));
     }
 
     @Test
-    void getInteger_equalThree() throws SQLException {
+    void getIntegerEqualThree() throws SQLException {
         Mockito.when(resultSet.getInt("int")).thenReturn(3);
 
         int integer = dynamicalMethodUtils.getInteger("int");
@@ -153,7 +153,7 @@ class DynamicalMethodUtilsTest {
         assertEquals(3, integer);
     }    @Test
 
-    void getInteger_notEqualThree() throws SQLException {
+    void getIntegerNotEqualThree() throws SQLException {
         Mockito.when(resultSet.getInt("int")).thenReturn(5);
 
         int integer = dynamicalMethodUtils.getInteger("int");
@@ -162,7 +162,7 @@ class DynamicalMethodUtilsTest {
     }
 
     @Test
-    void getInteger_throwSqlException() throws SQLException {
+    void getIntegerThrowSqlException() throws SQLException {
         Mockito.when(resultSet.getInt("int")).thenThrow(new SQLException());
 
         assertThrows(SQLException.class, () -> dynamicalMethodUtils.getInteger("int"));

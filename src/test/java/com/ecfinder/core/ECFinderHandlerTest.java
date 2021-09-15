@@ -60,7 +60,7 @@ class ECFinderHandlerTest {
     }
 
     @Test
-    void handleElements_page() {
+    void handleElementsAsPageObject() {
         List<ElementCollectionTest> elementCollectionTests = new ArrayList<>();
         elementCollectionTests.add(new ElementCollectionTest("Test_elm-col1"));
         elementCollectionTests.add(new ElementCollectionTest("Test_elm-col2"));
@@ -75,28 +75,28 @@ class ECFinderHandlerTest {
         assertNotNull(realData);
         assertEquals(mockData.getTotalElements(), realData.getTotalElements());
         assertEquals(mockData.getContent().get(0), realData.getContent().get(0));
+        assertEquals(pageable.getPageNumber(), realData.getNumber());
     }
 
     @Test
-    void handleElements_withoutECFAnnotation() {
+    void handleElementsWithoutECFAnnotation() {
         assertThrows(ClassNotMarkedAsElementCollectionException.class, () -> {
             ecRealData.handleElements(1, ElementCollectionWithoutAnnotation.class, EntityTest.class);
         });
     }
 
     @Test
-    void handleElements_withoutECFEntityAnnotation() {
+    void handleElementsWithoutECFEntityAnnotation() {
         assertThrows(ClassNotMarkedAsParentEntityException.class, () -> {
             ecRealData.handleElements(1, ElementCollectionTest.class, EntityTestWithoutAnnotation.class);
         });
     }
 
     @Test
-    void handleElements_throwTableNotExistsException() {
+    void handleElementsThrowTableNotExistsException() {
         assertThrows(TableNotExistsException.class, () -> {
             ecRealData.handleElements(1, ElementCollectionTest.class, EntityTestWithoutTable.class);
         });
     }
-
 
 }

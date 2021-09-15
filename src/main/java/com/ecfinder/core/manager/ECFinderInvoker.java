@@ -30,7 +30,7 @@ public class ECFinderInvoker<E> {
     }
 
     /**
-     * Get Page<E> depends on Pageable
+     * Gets Page<E> depends on Pageable
      *
      * @param entityId Depending on it the search will take place
      * @param clazz Embeddable class
@@ -40,5 +40,18 @@ public class ECFinderInvoker<E> {
      */
     public Page<E> invoke(long entityId, Class<?> clazz, Class<?> parentEntity, Pageable pageable){
         return ecFinderHandler.handleElements(entityId, clazz, parentEntity, pageable);
+    }
+
+    /**
+     * Gets single object by unique column
+     *
+     * @param entityId Depending on it the search will take place
+     * @param uniqueValue Unique value by which the search will be performed
+     * @param clazz Embeddable class
+     * @param parentEntity Parent entity class
+     * @return single object by unique column
+     */
+    public <U> E invoke(long entityId, U uniqueValue,Class<?> clazz, Class<?> parentEntity){
+        return ecFinderHandler.handleElements(entityId, uniqueValue, clazz, parentEntity);
     }
 }

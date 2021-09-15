@@ -15,10 +15,10 @@ import java.sql.ResultSet;
 //TODO: add logger, work with exception, check if table exists
 public class EntityRowMapper<E> implements RowMapper<E> {
     private final String METHOD_PREFIX = "get";
-    private final Class<?> entity;
+    private final Class<?> elementCollectionClass;
 
-    public EntityRowMapper(Class<?> entity) {
-        this.entity = entity;
+    public EntityRowMapper(Class<?> elementCollectionClass) {
+        this.elementCollectionClass = elementCollectionClass;
     }
 
     /**
@@ -31,7 +31,7 @@ public class EntityRowMapper<E> implements RowMapper<E> {
     @Override
     public E mapRow(ResultSet rs, int rowNum) {
         EntityInstanceUtils<E> eEntityInstanceUtils = new EntityInstanceUtils<>();
-        E newInstance = eEntityInstanceUtils.getNewInstance(entity);
+        E newInstance = eEntityInstanceUtils.getNewInstance(elementCollectionClass);
         Field[] declaredFields = newInstance.getClass().getDeclaredFields();
         for (Field declaredField : declaredFields) {
             fillField(rs, newInstance, declaredField);
