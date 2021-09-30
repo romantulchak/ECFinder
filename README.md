@@ -35,7 +35,6 @@ private List<ElementCollectionClass> getCityStops(Entity entity){
    return ecFinderInvoker.invoke(entity.getId(), ElementCollectionClass.class, EntityClass.class);
 }
 ```
-7. Change ```@SpringBootApplication``` to ```@SpringBootApplication(scanBasePackages = {"com.mapperDTO"})```
 
 
 # Technologies
